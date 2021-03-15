@@ -1,0 +1,32 @@
+{
+  "name": "free-chat-server",
+  "version": "1.0.0",
+  "description": "free chat server ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Yury Bogdanov",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "js-sha256": "^0.9.0",
+    "jwt-then": "^1.0.1",
+    "mongoose": "^5.11.15",
+    "multer": "^1.4.2",
+    "socket.io": "^3.1.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuriybogd/free-chat-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yuriybogd/free-chat-server/issues"
+  },
+  "homepage": "https://github.com/yuriybogd/free-chat-server#readme"
+}
