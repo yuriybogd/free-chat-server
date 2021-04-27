@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
         required: "City is required!",
       },
       avatarPhoto: {
-        data: Buffer,
+        data: String,
         contentType: String,
       }
     },
