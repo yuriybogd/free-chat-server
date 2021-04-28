@@ -1,27 +1,26 @@
-require("dotenv").config()
+require('dotenv').config()
 
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 mongoose.connect(process.env.DATABASE, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
 })
 
-
-mongoose.connection.on("error", (err) => {
-  console.log("Mongoose connection error " + err.message)
+mongoose.connection.on('error', (err) => {
+  console.log('Mongoose connection error ' + err.message)
 })
 
-mongoose.connection.once("open", () => {
-  console.log("MongoDB connected: " + process.env.DATABASE)
+mongoose.connection.once('open', () => {
+  console.log('MongoDB connected: ' + process.env.DATABASE)
 })
 
 //bring in the models
-require("./models/User")
-require("./models/Message")
-require("./models/Chatroom")
+require('./models/User')
+require('./models/Message')
+require('./models/Chatroom')
 
-const app = require("./app")
+const app = require('./app')
 
 const port = process.env.PORT || 8000
 
@@ -29,16 +28,16 @@ const server = app.listen(port, () => {
   console.log(`Server listening in port ${port}`)
 })
 
-const io = require("socket.io")(server, {
+const io = require('socket.io')(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
 })
-const jwt = require("jwt-then")
+const jwt = require('jwt-then')
 
-const Message = mongoose.model("Message")
-const User = mongoose.model("User")
+const Message = mongoose.model('Message')
+const User = mongoose.model('User')
 
 io.use(async (socket, next) => {
   try {
@@ -50,37 +49,47 @@ io.use(async (socket, next) => {
   }
 })
 
-io.on("connection", (socket) => {
-  console.log("Connected: " + socket.userId);
+io.on('connection', (socket) => {
+  console.log('Connected: ' + socket.userId)
 
-  socket.on("disconnect", () => {
-    console.log("Disconnected: " + socket.userId);
-  });
+  socket.on('disconnect', () => {
+    console.log('Disconnected: ' + socket.userId)
+  })
 
-  socket.on("joinRoom", ({ chatroomId }) => {
-    socket.join(chatroomId);
-    console.log("A user joined chatroom: " + chatroomId);
-  });
+  socket.on('joinRoom', ({ chatroomId }) => {
+    socket.join(chatroomId)
+    console.log('A user joined chatroom: ' + chatroomId)
+  })
 
-  socket.on("leaveRoom", ({ chatroomId }) => {
-    socket.leave(chatroomId);
-    console.log("A user left chatroom: " + chatroomId);
-  });
+  socket.on('leaveRoom', ({ chatroomId }) => {
+    socket.leave(chatroomId)
+    console.log('A user left chatroom: ' + chatroomId)
+  })
 
-  socket.on("chatroomMessage", async ({ chatroomId, message }) => {
+  // Bad words filter init
+  const Filter = require('bad-words')
+  const filter = new Filter({ list: ['bad', 'words', 'bitch'] })
+
+  socket.on('chatroomMessage', async ({ chatroomId, message }) => {
     if (message.trim().length > 0) {
-      const user = await User.findOne({ _id: socket.userId });
+      const user = await User.findOne({ _id: socket.userId })
+
+      // Record all messages even with bad words
       const newMessage = new Message({
         chatroom: chatroomId,
         user: socket.userId,
         message,
-      });
-      io.to(chatroomId).emit("newMessage", {
+        hasBadWords: filter.isProfane(message)
+      })
+
+
+      io.to(chatroomId).emit('newMessage', {
         message,
         name: user.name,
         userId: socket.userId,
-      });
-      await newMessage.save();
+        hasBadWords: filter.isProfane(message)
+      })
+      await newMessage.save()
     }
-  });
-});
+  })
+})

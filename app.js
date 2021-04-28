@@ -5,9 +5,6 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Use static files
-app.use(express.static('files'))
-
 //Setup Cross Origin
 const cors = require('cors')
 app.use(cors())
